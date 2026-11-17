@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Attendance Monitoring</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img class="brand-logo" src="icpep-logo.png" alt="ICpEP.SE logo">
+        <div>
+          <div class="brand-title">BSCpE 3</div>
+          <div class="brand-subtitle">Attendance Monitor</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item active" data-view="dashboard">
+          <span class="nav-icon">▦</span> Dashboard
+        </button>
+        <button class="nav-item" data-view="students">
+          <span class="nav-icon">♙</span> Students
+        </button>
+        <button class="nav-item" data-view="attendance">
+          <span class="nav-icon">✓</span> Attendance
+        </button>
+        <button class="nav-item" data-view="history">
+          <span class="nav-icon">▤</span> History
+        </button>
+      </nav>
+
+      <div class="sidebar-card">
+        <div class="sidebar-card-title">Today's Class</div>
+        <div class="sidebar-date" id="sidebarDate"></div>
+        <div class="sidebar-stat"><span>Class attendance</span><strong id="sidebarRate">0%</strong></div>
+      </div>
+
+      <div class="sidebar-footer">Student Attendance Monitoring Web Application</div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow" id="pageEyebrow">Dashboard</div>
+          <h1 id="pageTitle">Attendance Overview</h1>
+          <p id="pageSubtitle">Monitor today's attendance at a glance.</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn btn-secondary" id="resetBtn">Reset Today</button>
+          <button class="btn btn-secondary" id="markAllBtn" title="Marks every unmarked student as Present">Mark All Present</button>
+          <button class="btn btn-primary" id="addStudentBtn">+ Add Student</button>
+        </div>
+      </header>
+
+      <section id="dashboardView" class="view active-view">
+        <div class="summary-grid">
+          <div class="summary-card">
+            <div class="summary-icon neutral">♙</div>
+            <div>
+              <div class="summary-label">Total Students</div>
+              <div class="summary-value" id="totalStudents">0</div>
+            </div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-icon present">✓</div>
+            <div>
+              <div class="summary-label">Present</div>
+              <div class="summary-value" id="presentCount">0</div>
+            </div>
+            <div class="summary-chip" id="presentPct">0%</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-icon late">◷</div>
+            <div>
+              <div class="summary-label">Late</div>
+              <div class="summary-value" id="lateCount">0</div>
+            </div>
+            <div class="summary-chip" id="latePct">0%</div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-icon absent">!</div>
+            <div>
+              <div class="summary-label">Absent</div>
+              <div class="summary-value" id="absentCount">0</div>
+            </div>
+            <div class="summary-chip" id="absentPct">0%</div>
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Student Attendance</h2>
+                <p>Update the status directly from the table.</p>
+              </div>
+              <div class="filter-group">
+                <button class="filter-btn active" data-filter="All">All</button>
+                <button class="filter-btn" data-filter="Present">Present</button>
+                <button class="filter-btn" data-filter="Late">Late</button>
+                <button class="filter-btn" data-filter="Absent">Absent</button>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Present</th>
+                    <th>Absent</th>
+                    <th>Late</th>
+                    <th>Attendance %</th>
+                    <th>Status</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="attendanceTable"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Class Summary</h2>
+                <p id="summarySubtitle">Attendance distribution for today.</p>
+              </div>
+            </div>
+            <div class="donut-wrap">
+              <div class="donut" id="donut">
+                <div class="donut-center">
+                  <strong id="classRate">0%</strong>
+                  <span>Attendance</span>
+                </div>
+              </div>
+              <div class="marked-progress" id="markedProgress"></div>
+              <div class="legend">
+                <div><span class="legend-dot present-dot"></span><span>Present</span><strong id="legendPresent">0</strong></div>
+                <div><span class="legend-dot late-dot"></span><span>Late</span><strong id="legendLate">0</strong></div>
+                <div><span class="legend-dot absent-dot"></span><span>Absent</span><strong id="legendAbsent">0</strong></div>
+                <div><span class="legend-dot unmarked-dot"></span><span>Unmarked</span><strong id="legendUnmarked">0</strong></div>
+              </div>
+            </div>
+            <div class="notice">
+              <div class="notice-title">Attendance percentage</div>
+              <div class="notice-text">Present and Late students both count as attended. Late is also shown separately. The rate only includes students who have been marked.</div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="studentsView" class="view">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Student List</h2>
+              <p>Manage students and review their attendance records.</p>
+            </div>
+            <div class="student-management-actions">
+              <div class="search-wrap">
+                <input id="studentSearch" type="search" placeholder="Search student..." aria-label="Search student">
+              </div>
+              <button class="btn btn-danger" id="removeSelectedBtn" disabled>Remove Selected (0)</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th class="select-column"><input type="checkbox" id="selectAllStudents" aria-label="Select all visible students"></th>
+                  <th>ID</th>
+                  <th>Student Name</th>
+                  <th>Present</th>
+                  <th>Absent</th>
+                  <th>Late</th>
+                  <th>Attendance %</th>
+                  <th>Status</th>
+                  <th>Mark</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="studentsTable"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section id="historyView" class="view">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Attendance History</h2>
+              <p>View attendance records saved for previous dates.</p>
+            </div>
+            <div class="header-actions">
+              <button class="btn btn-secondary" id="exportCsvBtn">Export CSV</button>
+              <button class="btn btn-secondary" id="importCsvBtn">Import CSV</button>
+              <input type="file" id="importCsvInput" accept=".csv,text/csv" hidden>
+              <button class="btn btn-secondary" id="clearHistoryBtn">Clear History</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Present</th>
+                  <th>Late</th>
+                  <th>Absent</th>
+                  <th>Attendance Rate</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="historyTable"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel history-detail-panel" id="historyDetailPanel" style="display:none; margin-top:18px;">
+          <div class="panel-header">
+            <div>
+              <h2 id="historyDetailTitle">Attendance Details</h2>
+              <p id="historyDetailSubtitle"></p>
+            </div>
+            <button class="btn btn-secondary" id="closeHistoryDetail">Close</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Student ID</th>
+                  <th>Student Name</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="historyDetailTable"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section id="attendanceView" class="view">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Attendance Monitoring</h2>
+              <p id="attendanceDateText">Select a date and record attendance.</p>
+            </div>
+            <div class="attendance-date-control">
+              <label for="attendanceDate">Attendance Date</label>
+              <input type="date" id="attendanceDate">
+            </div>
+            <div class="filter-group">
+              <button class="filter-btn active" data-filter="All">All</button>
+              <button class="filter-btn" data-filter="Present">Present</button>
+              <button class="filter-btn" data-filter="Late">Late</button>
+              <button class="filter-btn" data-filter="Absent">Absent</button>
+            </div>
+          </div>
+          <div class="attendance-cards" id="attendanceCards"></div>
+        </section>
+      </section>
+
+      <footer class="footer">
+        <span>Data is stored locally in this browser.</span>
+        <span id="footerDate"></span>
+      </footer>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="modal-close" id="modalClose" aria-label="Close">×</button>
+      <h2 id="modalTitle">Add Student</h2>
+      <p id="modalDesc">Add a student to the attendance list.</p>
+      <form id="studentForm" autocomplete="off">
+        <label>
+          Student ID
+          <input id="studentId" required maxlength="20" placeholder="e.g. 004">
+        </label>
+        <label>
+          Student Name
+          <input id="studentName" required maxlength="80" placeholder="e.g. Ana Reyes">
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="modalCancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="studentSubmit">Add Student</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop confirm-backdrop" id="confirmBackdrop">
+    <div class="modal confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmMessage">
+      <h2 id="confirmTitle">Are you sure?</h2>
+      <p id="confirmMessage"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="confirmCancel">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmOk">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  <script src="script.js"></script>
+</body>
+</html>
